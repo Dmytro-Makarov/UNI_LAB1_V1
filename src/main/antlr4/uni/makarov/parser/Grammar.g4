@@ -22,14 +22,9 @@ parse
 
 string
 : WORD+
+| ANY+
 ;
 
-/*
-expression
-: number
-| id
-;
-*/
 
 number
 : LPAREN number RPAREN                                              #parenthesisExpr
@@ -37,7 +32,7 @@ number
 | number operatorToker=(ADD|SUB) number                             #addSumExpr
 | <assoc=right> number EXP number                                   #expExpr
 | number operatorToker=(MOD|DIV) number                             #modDivExpr
-| operatorToker=(MMIN|MMAX) LPAREN (number( ',' number)*)? RPAREN   #functionExpr
+| operatorToker=(MMIN|MMAX) LPAREN (number ',' number)? RPAREN      #functionExpr
 | NUMBER                                                            #numericExpr
 ;
 
@@ -47,17 +42,10 @@ id
 | id operatorToker=(ADD|SUB) id                             #addSumCellExpr
 | <assoc=right> id EXP id                                   #expCellExpr
 | id operatorToker=(MOD|DIV) id                             #modDivCellExpr
-| operatorToker=(MMIN|MMAX) LPAREN (id( ',' id)*)? RPAREN   #functionCellExpr
+| operatorToker=(MMIN|MMAX) LPAREN (id ',' id)? RPAREN      #functionCellExpr
 | ID                                                        #cellIDExpr
 ;
 
-
-/*
-arguments
-: number( ',' number)*                      #funcArgExpr
-| id( ',' id)*                              #funcArgCellExpr
-;
-*/
 
 /*
 * Lexer Rules
@@ -65,7 +53,8 @@ arguments
 
 fragment LETTER: [a-zA-Z];
 fragment DIGIT: [0-9];
-NUMBER : ( DIGIT * '.' )? DIGIT+;
+fragment SYMBOLS: [!?"'.`;:];
+NUMBER : ('-')? ( DIGIT * '.' )? DIGIT+;
 EXP : '^';
 MULTIPLY : '*';
 DIVIDE : '/';
@@ -75,7 +64,7 @@ MOD : 'mod';
 DIV : 'div';
 MMAX : 'mmax';
 MMIN : 'mmin';
-WORD : LETTER+;
+WORD : LETTER+ | SYMBOLS;
 CELL_COL : [A-Z]+;
 CELL_ROW : DIGIT+;
 ID : CELL_COL CELL_ROW;

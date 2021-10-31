@@ -1,21 +1,21 @@
 package uni.makarov.lab1;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.spreadsheet.GridBase;
-import org.controlsfx.control.spreadsheet.SpreadsheetCell;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
 import org.controlsfx.control.spreadsheet.SpreadsheetView;
+
+import java.io.*;
+import java.util.Optional;
 
 
 ///Window Hierarchy///
@@ -40,16 +40,14 @@ Toggle Function/Value view
 Maybe: Zoom slider
 */
 
-/*
-TODO:   Idea: Make a big GridBase and hide all of the unnessessary rows and columns
-        Make buttons hide and show next rows and columns
-*/
 //UI
 public class ApplicationView {
     private VBox root;
 
-    private MenuBar menuBar;
-    private Menu menu1;
+    private MenuItem menuISave;
+    private MenuItem menuIOpen;
+    private MenuItem menuIFunctions;
+    private MenuItem menuIErrors;
 
     private ToggleSwitch toggleSwitchFV;
     private Button buttonRowM;
@@ -59,7 +57,8 @@ public class ApplicationView {
 
     private GridBase grid;
     private SpreadsheetView spv;
-    private TextField textField;
+    private TextField textFieldSPV;
+
 
     private ApplicationController controller;
     private ApplicationModel model;
@@ -71,14 +70,23 @@ public class ApplicationView {
         initUI();
     }
 
+
     private void initUI(){
         root = new VBox();
-        root.setFillWidth(true);
+        MenuBar menuBar = new MenuBar();
 
-        menuBar = new MenuBar();
+        Menu menuFile = new Menu("Файл");
+        Menu menuHelp = new Menu("Інформація");
 
-        menu1 = new Menu("Placeholder");
-        menuBar.getMenus().add(menu1);
+        menuISave = new MenuItem("Зберегти...");
+        menuIOpen = new MenuItem("Відкрити...");
+        menuFile.getItems().addAll(menuISave, menuIOpen);
+
+        menuIFunctions = new MenuItem("Функціонал");
+        menuIErrors = new MenuItem("Помилки");
+        menuHelp.getItems().addAll(menuIFunctions, menuIErrors);
+
+        menuBar.getMenus().addAll(menuFile, menuHelp);
         root.getChildren().add(menuBar);
 
         initMain();
@@ -103,6 +111,8 @@ public class ApplicationView {
     private void initMain(){
         //SPLIT_PANE HORIZONTAL
         SplitPane splitPaneHOR = new SplitPane();
+
+        VBox.setVgrow(splitPaneHOR, Priority.ALWAYS);
 
         //VBOX for controls
         VBox vboxSPH1 = new VBox();
@@ -150,9 +160,7 @@ public class ApplicationView {
         anchorPaneVB3.getChildren().add(buttonColM);
         anchorPaneVB3.getChildren().add(buttonColP);
 
-        vboxSPH1.getChildren().add(anchorPaneVB1);
-        vboxSPH1.getChildren().add(anchorPaneVB2);
-        vboxSPH1.getChildren().add(anchorPaneVB3);
+        vboxSPH1.getChildren().addAll(anchorPaneVB1, anchorPaneVB2, anchorPaneVB3);
 
         splitPaneHOR.getItems().add(vboxSPH1);
         vboxSPH1.maxWidthProperty().bind(splitPaneHOR.widthProperty().multiply(0.225));
@@ -162,7 +170,7 @@ public class ApplicationView {
         splitPaneVER.setOrientation(Orientation.VERTICAL);
 
         //TEXT FIELD for functions
-        textField = new TextField("Функція тут");
+        textFieldSPV = new TextField("Функція тут");
 
         //Create Spreadsheet
         grid = model.initGrids(10,15);
@@ -172,7 +180,7 @@ public class ApplicationView {
         spv.setEditable(false);
 
         //SPLIT_PANE VERTICAL
-        splitPaneVER.getItems().add(textField);
+        splitPaneVER.getItems().add(textFieldSPV);
         splitPaneVER.getItems().add(spv);
 
         splitPaneHOR.getItems().add(splitPaneVER);
@@ -212,7 +220,7 @@ public class ApplicationView {
                 }
             } catch (IndexOutOfBoundsException e){
                 System.err.print("ROW/COLUMN INDEX OUT OF BOUNDS!\nSetting default values...\n");
-                textField.setText("ERR:ROW/COLUMN INDEX OUT OF BOUNDS!");
+                textFieldSPV.setText("ERR:ROW/COLUMN INDEX OUT OF BOUNDS!");
                 model.setRowCount(5);
                 model.setColumnCount(5);
                 hideRowsColumns();
@@ -225,13 +233,45 @@ public class ApplicationView {
         hideRowsColumns();
     }
 
+    protected void stageCloseRequest(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+        alert.setTitle("Закінчується сеанс");
+        alert.setHeaderText("Ви хочете зберегти таблицю?");
+
+        ButtonType buttonTypeYes = new ButtonType("Так", ButtonBar.ButtonData.YES);
+        ButtonType buttonTypeNo = new ButtonType("Ні", ButtonBar.ButtonData.NO);
+
+        alert.getButtonTypes().setAll(buttonTypeYes, buttonTypeNo);
+
+        Optional<ButtonType> saveResult = alert.showAndWait();
+
+        if(saveResult.get() == buttonTypeYes) {
+
+            TextInputDialog textInputDialog = new TextInputDialog();
+
+            textInputDialog.setTitle("Зберегти таблицю");
+            textInputDialog.setHeaderText("Введіть назву таблиці");
+            textInputDialog.setContentText("Name: ");
+            Optional<String> result = textInputDialog.showAndWait();
+            result.ifPresent(name -> {
+                try {
+                    controller.saveSpreadsheetCall(name);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            updSpreadsheet();
+        }
+    }
+
     private void initEventHandler(){
-            textField.setOnKeyPressed(event -> {
+            textFieldSPV.setOnKeyPressed(event -> {
                 if(event.getCode().equals(KeyCode.ENTER)){
-                    String result = controller.receiveText(textField.getText());
+                    String result = controller.receiveText(textFieldSPV.getText());
                     int column = spv.getSelectionModel().getFocusedCell().getColumn();
                     int row = spv.getSelectionModel().getFocusedCell().getRow();
-                    grid.setCellValue(row, column, textField.getText());
+                    grid.setCellValue(row, column, textFieldSPV.getText());
                     model.setCellValue(row, column, true, result);
                 }
             });
@@ -261,34 +301,120 @@ public class ApplicationView {
                 grid = controller.toggleSwitched(switchValue);
                 System.out.println(model.getCellValue(0,0, false));
                 spv.getSelectionModel().clearSelection();
-                //TODO:Maybe send selected cell to parse anyway
 
                 updSpreadsheet();
 
                 if (switchValue){
-                    textField.setDisable(true);
+                    textFieldSPV.setDisable(true);
                     buttonColM.setDisable(true);
                     buttonColP.setDisable(true);
                     buttonRowM.setDisable(true);
                     buttonRowP.setDisable(true);
 
-                    //Toogle for Spreadsheet access
+                    //Toggle for Spreadsheet access
                     //Default - false
                     //spv.setEditable(false);
                 } else {
-                    textField.setDisable(false);
+                    textFieldSPV.setDisable(false);
                     buttonColM.setDisable(false);
                     buttonColP.setDisable(false);
                     buttonRowM.setDisable(false);
                     buttonRowP.setDisable(false);
 
-                    //Toogle for Spreadsheet access
+                    //Toggle for Spreadsheet access
                     //Default - false
                     //spv.setEditable(true);
-                }
+                }});
+
+                menuISave.setOnAction(actionEvent -> {
+                        TextInputDialog textInputDialog = new TextInputDialog();
+
+                        textInputDialog.setTitle("Зберегти таблицю");
+                        textInputDialog.setHeaderText("Введіть назву таблиці");
+                        textInputDialog.setContentText("Name: ");
+                        Optional<String> result = textInputDialog.showAndWait();
+                        result.ifPresent(name -> {
+                            try {
+                                controller.saveSpreadsheetCall(name);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    updSpreadsheet();
+                });
+
+                menuIOpen.setOnAction(actionEvent -> {
+                    TextInputDialog textInputDialog = new TextInputDialog();
+
+                    textInputDialog.setTitle("Відкрити таблицю");
+                    textInputDialog.setHeaderText("Введіть назву таблиці");
+                    textInputDialog.setContentText("Name: ");
+                    Optional<String> result = textInputDialog.showAndWait();
+                    result.ifPresent(name -> {
+                        try {
+                            controller.openSpreadsheetCall(name);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    //using a method for a toggle switch when it wasn't switched
+                    grid = controller.toggleSwitched(toggleSwitchFV.isSelected());
+                    updSpreadsheet();
+                });
+
+                menuIFunctions.setOnAction(actionEvent -> {
+                    Stage popupStage = new Stage();
+                    Label popupText = new Label();
+                    popupText.setTextAlignment(TextAlignment.LEFT);
+                    popupText.setWrapText(true);
+
+                    String line;
+                    String message = "";
+                    String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\functions.txt";
+                    try {
+                        BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
+                        while ((line = bufferedReader.readLine()) != null){
+                            message += (line + "\n");
+                        }
+                        popupText.setText(message);
+                    } catch (FileNotFoundException e) {
+                        popupText.setText("ERROR: UNABLE TO GET TEXT");
+                    } catch (IOException e) {
+                        popupText.setText("ERROR: UNABLE TO GET TEXT");
+                    }
+                    popupStage.setTitle("Функціонал");
+                    popupStage.setScene(new Scene(popupText, 300, 500));
+                    //popupStage.setResizable(false);
+                    popupStage.show();
+                });
+
+                menuIErrors.setOnAction(actionEvent -> {
+                    Stage popupStage = new Stage();
+                    Label popupText = new Label();
+                    popupText.setTextAlignment(TextAlignment.LEFT);
+                    popupText.setWrapText(true);
 
 
-            });
+                    String line;
+                    String message = "";
+                    String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\errors.txt";
+                    try {
+                        BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
+                        while ((line = bufferedReader.readLine()) != null){
+                            message += (line + "\n");
+                        }
+                        popupText.setText(message);
+                    } catch (FileNotFoundException e) {
+                        popupText.setText("ERROR: UNABLE TO GET TEXT");
+                    } catch (IOException e) {
+                        popupText.setText("ERROR: UNABLE TO GET TEXT");
+                    }
+                    popupStage.setTitle("Помилки");
+                    popupStage.setScene(new Scene(popupText, 300, 500));
+                    //popupStage.setResizable(false);
+                    popupStage.show();
+                });
+
     }
 
     public Parent asParent(){

@@ -12,22 +12,28 @@ public class ApplicationController {
 
     protected void incCol(){
         model.incColumnCount();
-    };
+    }
     protected void decCol(){
         model.decColumnCount();
-    };
+    }
     protected void incRow(){
         model.incRowCount();
-    };
+    }
     protected void decRow(){
         model.decRowCount();
-    };
+    }
 
     protected String receiveText(String text){
         //Parse text
-        String result = model.parse(text);
+        return model.parse(text);
+    }
 
-        return result;
+    protected void saveSpreadsheetCall(String name) throws Exception {
+        model.saveSpreadsheet(name);
+    }
+
+    protected void openSpreadsheetCall(String name) throws Exception {
+        model.loadSpreadsheet(name);
     }
 
     protected GridBase toggleSwitched(boolean switchValue){

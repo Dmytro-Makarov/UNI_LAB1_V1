@@ -1,6 +1,6 @@
 module uni.makarov.uni_lab1_v1 {
     requires javafx.controls;
-    requires javafx.fxml;
+    requires javafx.base;
 
     requires org.controlsfx.controls;
     requires javafx.graphics;

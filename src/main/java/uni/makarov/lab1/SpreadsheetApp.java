@@ -19,6 +19,8 @@ public class SpreadsheetApp extends Application {
 
         Scene scene = new Scene(applicationView.asParent(), 800, 400);
 
+        primaryStage.setOnCloseRequest(event -> applicationView.stageCloseRequest());
+
         //STAGE
         primaryStage.setTitle("Laboratory No.1");
         primaryStage.setScene(scene);
