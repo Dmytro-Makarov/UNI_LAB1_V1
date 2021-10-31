@@ -2,13 +2,21 @@ package uni.makarov.lab1;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.controlsfx.control.spreadsheet.*;
+import org.controlsfx.control.spreadsheet.GridBase;
+import org.controlsfx.control.spreadsheet.SpreadsheetCell;
+import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
+import org.controlsfx.control.spreadsheet.SpreadsheetView;
 import uni.makarov.parser.GrammarLexer;
 import uni.makarov.parser.GrammarParser;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.Scanner;
 
 
@@ -16,15 +24,29 @@ import java.util.Scanner;
 public class ApplicationModel {
     static GridBase gridFunc;
     static GridBase gridValue;
-    int rowCount;
-    int columnCount;
     final int realRowCount = 100;
     final int realColumnCount = 100;
+    int rowCount;
+    int columnCount;
 
-    ApplicationModel(){}
+    ApplicationModel() {
+    }
+
+    static public Object getCellValue(int row, int column, boolean gridType) {
+        SpreadsheetView gridAccess;
+        if (gridType) {
+            gridAccess = new SpreadsheetView(gridValue);
+        } else {
+            gridAccess = new SpreadsheetView(gridFunc);
+        }
+        ObservableList accessRows = gridAccess.getItems();
+        ObservableList accessColumns = (ObservableList) accessRows.get(row);
+        SpreadsheetCell cell = (SpreadsheetCell) accessColumns.get(column);
+        return cell.getText();
+    }
 
     //Initializes two grids: function and value grids
-    GridBase initGrids(int rows, int columns){
+    GridBase initGrids(int rows, int columns) {
         rowCount = rows;
         columnCount = columns;
         gridFunc = new GridBase(realRowCount, realColumnCount);
@@ -36,8 +58,8 @@ public class ApplicationModel {
             ObservableList<SpreadsheetCell> listV = FXCollections.observableArrayList();
             ObservableList<SpreadsheetCell> listF = FXCollections.observableArrayList();
             for (int column = 0; column < gridValue.getColumnCount(); ++column) {
-                listV.add(SpreadsheetCellType.STRING.createCell(row, column, 1, 1,""));
-                listF.add(SpreadsheetCellType.STRING.createCell(row, column, 1, 1,""));
+                listV.add(SpreadsheetCellType.STRING.createCell(row, column, 1, 1, ""));
+                listF.add(SpreadsheetCellType.STRING.createCell(row, column, 1, 1, ""));
             }
             rowsV.add(listV);
             rowsF.add(listF);
@@ -49,73 +71,62 @@ public class ApplicationModel {
         return gridFunc;
     }
 
-    GridBase getGrid(boolean gridType){
+    GridBase getGrid(boolean gridType) {
         System.out.println(gridType);
-        if(gridType){
+        if (gridType) {
             return gridValue;
-        }
-        else return gridFunc;
+        } else return gridFunc;
     }
 
-    void setRowCount(int value){
-        rowCount = value;
+    void incRowCount() {
+        ++rowCount;
     }
 
-    void setColumnCount(int value){
-        columnCount = value;
-    }
-
-    void incRowCount(){
-         ++rowCount;
-    }
-
-    void incColumnCount(){
+    void incColumnCount() {
         ++columnCount;
     }
 
-    void decRowCount(){
+    void decRowCount() {
         --rowCount;
     }
 
-    void decColumnCount(){
+    void decColumnCount() {
         --columnCount;
     }
 
-    int getRowCount(){
+    int getRowCount() {
         return rowCount;
     }
 
-    int getColumnCount(){
+    void setRowCount(int value) {
+        rowCount = value;
+    }
+
+    int getColumnCount() {
         return columnCount;
     }
 
-    int getRealRowCount(){
+    void setColumnCount(int value) {
+        columnCount = value;
+    }
+
+    int getRealRowCount() {
         return realRowCount;
     }
 
-    int getRealColumnCount(){
+    int getRealColumnCount() {
         return realColumnCount;
     }
 
-    public void setCellValue(int row, int column, boolean gridType, Object value){
-        if (gridType){
+    public void setCellValue(int row, int column, boolean gridType, Object value) {
+        if (gridType) {
             gridValue.setCellValue(row, column, value);
         } else {
             gridFunc.setCellValue(row, column, value);
         }
     }
 
-    static public Object getCellValue(int row, int column, boolean gridType){
-        SpreadsheetView gridAccess;
-        if (gridType) {gridAccess = new SpreadsheetView(gridValue);}
-        else {gridAccess = new SpreadsheetView(gridFunc);}
-        ObservableList accessRows = gridAccess.getItems();
-        ObservableList accessColumns = (ObservableList) accessRows.get(row);
-        SpreadsheetCell cell = (SpreadsheetCell) accessColumns.get(column);
-        return cell.getText();
-    }
-
-    String parse(String string){
+    String parse(String string) {
         String result;
 
         CharStream input = CharStreams.fromString(string);
@@ -141,16 +152,16 @@ public class ApplicationModel {
     }
 
     public void saveSpreadsheet(String fileName) throws Exception {
-        if(!fileName.contains(".txt")){
+        if (!fileName.contains(".txt")) {
             fileName = fileName.trim() + ".txt";
         }
         BufferedWriter bfw = new BufferedWriter(new FileWriter(fileName));
 
         bfw.write(getRowCount() + ";");
         bfw.write(getColumnCount() + ";\n");
-        for(int row = 0; row < getRowCount(); row++) {
-            for (int column = 0; column < getColumnCount(); column++){
-                if(getCellValue(row, column, false) != "" && getCellValue(row, column, false) != null) {
+        for (int row = 0; row < getRowCount(); row++) {
+            for (int column = 0; column < getColumnCount(); column++) {
+                if (getCellValue(row, column, false) != "" && getCellValue(row, column, false) != null) {
                     bfw.write(row + ";");
                     bfw.write(column + ";");
                     bfw.write(getCellValue(row, column, false) + ";");
@@ -163,7 +174,7 @@ public class ApplicationModel {
     }
 
     public void loadSpreadsheet(String fileName) throws FileNotFoundException {
-        if(!fileName.contains(".txt")){
+        if (!fileName.contains(".txt")) {
             fileName = fileName.trim() + ".txt";
         }
 
@@ -179,13 +190,13 @@ public class ApplicationModel {
 
         initGrids(row, column);
 
-        while (scanner.hasNext()){
-                int r = Integer.parseInt(scanner.next());
-                int c = Integer.parseInt(scanner.next());
-                setCellValue(r, c, false, scanner.next());
-                setCellValue(r, c, true, scanner.next());
-                scanner.nextLine();
-            }
+        while (scanner.hasNext()) {
+            int r = Integer.parseInt(scanner.next());
+            int c = Integer.parseInt(scanner.next());
+            setCellValue(r, c, false, scanner.next());
+            setCellValue(r, c, true, scanner.next());
+            scanner.nextLine();
+        }
 
 
     }

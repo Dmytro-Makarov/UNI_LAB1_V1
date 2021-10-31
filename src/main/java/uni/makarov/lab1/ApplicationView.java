@@ -7,14 +7,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.spreadsheet.GridBase;
 import org.controlsfx.control.spreadsheet.SpreadsheetView;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Optional;
 
 
@@ -67,10 +72,10 @@ public class ApplicationView {
     private TextField textFieldSPV;
 
 
-    private ApplicationController controller;
-    private ApplicationModel model;
+    private final ApplicationController controller;
+    private final ApplicationModel model;
 
-    public ApplicationView(ApplicationController controller, ApplicationModel model){
+    public ApplicationView(ApplicationController controller, ApplicationModel model) {
         this.controller = controller;
         this.model = model;
 
@@ -78,7 +83,7 @@ public class ApplicationView {
     }
 
 
-    private void initUI(){
+    private void initUI() {
         root = new VBox();
         MenuBar menuBar = new MenuBar();
 
@@ -100,8 +105,8 @@ public class ApplicationView {
         initEventHandler();
     }
 
-    private void setAnchors(Node node, double topAnchor, double bottomAnchor, double leftAnchor, double rightAnchor){
-        if (topAnchor != 0){
+    private void setAnchors(Node node, double topAnchor, double bottomAnchor, double leftAnchor, double rightAnchor) {
+        if (topAnchor != 0) {
             AnchorPane.setTopAnchor(node, topAnchor);
         }
         if (bottomAnchor != 0) {
@@ -110,12 +115,12 @@ public class ApplicationView {
         if (leftAnchor != 0) {
             AnchorPane.setLeftAnchor(node, leftAnchor);
         }
-        if (rightAnchor != 0){
+        if (rightAnchor != 0) {
             AnchorPane.setRightAnchor(node, rightAnchor);
         }
     }
 
-    private void initMain(){
+    private void initMain() {
         //SPLIT_PANE HORIZONTAL
         SplitPane splitPaneHOR = new SplitPane();
 
@@ -180,7 +185,7 @@ public class ApplicationView {
         textFieldSPV = new TextField("Функція тут");
 
         //Create Spreadsheet
-        grid = model.initGrids(10,15);
+        grid = model.initGrids(10, 15);
         spv = new SpreadsheetView(grid);
         hideRowsColumns();
 
@@ -196,43 +201,43 @@ public class ApplicationView {
         root.getChildren().add(splitPaneHOR);
     }
 
-    private boolean hideRowsColumns(){
+    private boolean hideRowsColumns() {
         int rowCount = model.getRowCount();
         int columnCount = model.getColumnCount();
         int realRowCount = model.getRealRowCount();
         int realColumnCount = model.getRealColumnCount();
-            try {
-                if (rowCount > realRowCount || columnCount > realColumnCount) {
-                    return false;
-                }
-                for (int row = rowCount; row < realRowCount; ++row) {
-                    if (!spv.isRowHidden(row)) {
-                        spv.hideRow(row);
-                    }
-                }
-                for (int row = 0; row <= rowCount; ++row) {
-                    if (spv.isRowHidden(row)) {
-                        spv.showRow(row);
-                    }
-                }
-                for (int column = columnCount; column < realColumnCount; ++column) {
-                    if (!spv.isColumnHidden(column)) {
-                        spv.hideColumn(spv.getColumns().get(column));
-                    }
-                }
-                for (int column = 0; column <= columnCount; ++column) {
-                    if (spv.isColumnHidden(column)) {
-                        spv.showColumn(spv.getColumns().get(column));
-                    }
-                }
-            } catch (IndexOutOfBoundsException e){
-                System.err.print("ROW/COLUMN INDEX OUT OF BOUNDS!\nSetting default values...\n");
-                textFieldSPV.setText("ERR:ROW/COLUMN INDEX OUT OF BOUNDS!");
-                model.setRowCount(5);
-                model.setColumnCount(5);
-                hideRowsColumns();
+        try {
+            if (rowCount > realRowCount || columnCount > realColumnCount) {
+                return false;
             }
-            return true;
+            for (int row = rowCount; row < realRowCount; ++row) {
+                if (!spv.isRowHidden(row)) {
+                    spv.hideRow(row);
+                }
+            }
+            for (int row = 0; row <= rowCount; ++row) {
+                if (spv.isRowHidden(row)) {
+                    spv.showRow(row);
+                }
+            }
+            for (int column = columnCount; column < realColumnCount; ++column) {
+                if (!spv.isColumnHidden(column)) {
+                    spv.hideColumn(spv.getColumns().get(column));
+                }
+            }
+            for (int column = 0; column <= columnCount; ++column) {
+                if (spv.isColumnHidden(column)) {
+                    spv.showColumn(spv.getColumns().get(column));
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            System.err.print("ROW/COLUMN INDEX OUT OF BOUNDS!\nSetting default values...\n");
+            textFieldSPV.setText("ERR:ROW/COLUMN INDEX OUT OF BOUNDS!");
+            model.setRowCount(5);
+            model.setColumnCount(5);
+            hideRowsColumns();
+        }
+        return true;
     }
 
     private void updSpreadsheet() {
@@ -240,7 +245,7 @@ public class ApplicationView {
         hideRowsColumns();
     }
 
-    protected void stageCloseRequest(){
+    protected void stageCloseRequest() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 
         alert.setTitle("Закінчується сеанс");
@@ -253,7 +258,7 @@ public class ApplicationView {
 
         Optional<ButtonType> saveResult = alert.showAndWait();
 
-        if(saveResult.get() == buttonTypeYes) {
+        if (saveResult.get() == buttonTypeYes) {
 
             TextInputDialog textInputDialog = new TextInputDialog();
 
@@ -272,159 +277,160 @@ public class ApplicationView {
         }
     }
 
-    private void initEventHandler(){
-            textFieldSPV.setOnKeyPressed(event -> {
-                if(event.getCode().equals(KeyCode.ENTER)){
-                    String result = controller.receiveText(textFieldSPV.getText());
-                    int column = spv.getSelectionModel().getFocusedCell().getColumn();
-                    int row = spv.getSelectionModel().getFocusedCell().getRow();
-                    grid.setCellValue(row, column, textFieldSPV.getText());
-                    model.setCellValue(row, column, true, result);
+    private void initEventHandler() {
+        textFieldSPV.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                String result = controller.receiveText(textFieldSPV.getText());
+                int column = spv.getSelectionModel().getFocusedCell().getColumn();
+                int row = spv.getSelectionModel().getFocusedCell().getRow();
+                grid.setCellValue(row, column, textFieldSPV.getText());
+                model.setCellValue(row, column, true, result);
+            }
+        });
+
+        buttonRowM.setOnAction(actionEvent -> {
+            controller.decRow();
+            hideRowsColumns();
+        });
+
+        buttonRowP.setOnAction(actionEvent -> {
+            controller.incRow();
+            hideRowsColumns();
+        });
+
+        buttonColM.setOnAction(actionEvent -> {
+            controller.decCol();
+            hideRowsColumns();
+        });
+
+        buttonColP.setOnAction(actionEvent -> {
+            controller.incCol();
+            hideRowsColumns();
+        });
+
+        toggleSwitchFV.setOnMouseClicked(mouseEvent -> {
+            boolean switchValue = toggleSwitchFV.isSelected();
+            grid = controller.toggleSwitched(switchValue);
+            System.out.println(ApplicationModel.getCellValue(0, 0, false));
+            spv.getSelectionModel().clearSelection();
+
+            updSpreadsheet();
+
+            if (switchValue) {
+                textFieldSPV.setDisable(true);
+                buttonColM.setDisable(true);
+                buttonColP.setDisable(true);
+                buttonRowM.setDisable(true);
+                buttonRowP.setDisable(true);
+
+                //Toggle for Spreadsheet access
+                //Default - false
+                //spv.setEditable(false);
+            } else {
+                textFieldSPV.setDisable(false);
+                buttonColM.setDisable(false);
+                buttonColP.setDisable(false);
+                buttonRowM.setDisable(false);
+                buttonRowP.setDisable(false);
+
+                //Toggle for Spreadsheet access
+                //Default - false
+                //spv.setEditable(true);
+            }
+        });
+
+        menuISave.setOnAction(actionEvent -> {
+            TextInputDialog textInputDialog = new TextInputDialog();
+
+            textInputDialog.setTitle("Зберегти таблицю");
+            textInputDialog.setHeaderText("Введіть назву таблиці");
+            textInputDialog.setContentText("Name: ");
+            Optional<String> result = textInputDialog.showAndWait();
+            result.ifPresent(name -> {
+                try {
+                    controller.saveSpreadsheetCall(name);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
+            updSpreadsheet();
+        });
 
-            buttonRowM.setOnAction(actionEvent -> {
-                controller.decRow();
-                hideRowsColumns();
+        menuIOpen.setOnAction(actionEvent -> {
+            TextInputDialog textInputDialog = new TextInputDialog();
+
+            textInputDialog.setTitle("Відкрити таблицю");
+            textInputDialog.setHeaderText("Введіть назву таблиці");
+            textInputDialog.setContentText("Name: ");
+            Optional<String> result = textInputDialog.showAndWait();
+            result.ifPresent(name -> {
+                try {
+                    controller.openSpreadsheetCall(name);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
+            //using a method for a toggle switch when it wasn't switched
+            grid = controller.toggleSwitched(toggleSwitchFV.isSelected());
+            updSpreadsheet();
+        });
 
-            buttonRowP.setOnAction(actionEvent -> {
-                controller.incRow();
-                hideRowsColumns();
-            });
+        menuIFunctions.setOnAction(actionEvent -> {
+            Stage popupStage = new Stage();
+            Label popupText = new Label();
+            popupText.setTextAlignment(TextAlignment.LEFT);
+            popupText.setWrapText(true);
 
-            buttonColM.setOnAction(actionEvent -> {
-                controller.decCol();
-                hideRowsColumns();
-            });
+            String line;
+            String message = "";
+            String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\functions.txt";
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
+                while ((line = bufferedReader.readLine()) != null) {
+                    message += (line + "\n");
+                }
+                popupText.setText(message);
+            } catch (FileNotFoundException e) {
+                popupText.setText("ERROR: UNABLE TO GET TEXT");
+            } catch (IOException e) {
+                popupText.setText("ERROR: UNABLE TO GET TEXT");
+            }
+            popupStage.setTitle("Функціонал");
+            popupStage.setScene(new Scene(popupText, 300, 500));
+            //popupStage.setResizable(false);
+            popupStage.show();
+        });
 
-            buttonColP.setOnAction(actionEvent -> {
-                controller.incCol();
-                hideRowsColumns();
-            });
-
-            toggleSwitchFV.setOnMouseClicked(mouseEvent -> {
-                boolean switchValue = toggleSwitchFV.isSelected();
-                grid = controller.toggleSwitched(switchValue);
-                System.out.println(model.getCellValue(0,0, false));
-                spv.getSelectionModel().clearSelection();
-
-                updSpreadsheet();
-
-                if (switchValue){
-                    textFieldSPV.setDisable(true);
-                    buttonColM.setDisable(true);
-                    buttonColP.setDisable(true);
-                    buttonRowM.setDisable(true);
-                    buttonRowP.setDisable(true);
-
-                    //Toggle for Spreadsheet access
-                    //Default - false
-                    //spv.setEditable(false);
-                } else {
-                    textFieldSPV.setDisable(false);
-                    buttonColM.setDisable(false);
-                    buttonColP.setDisable(false);
-                    buttonRowM.setDisable(false);
-                    buttonRowP.setDisable(false);
-
-                    //Toggle for Spreadsheet access
-                    //Default - false
-                    //spv.setEditable(true);
-                }});
-
-                menuISave.setOnAction(actionEvent -> {
-                        TextInputDialog textInputDialog = new TextInputDialog();
-
-                        textInputDialog.setTitle("Зберегти таблицю");
-                        textInputDialog.setHeaderText("Введіть назву таблиці");
-                        textInputDialog.setContentText("Name: ");
-                        Optional<String> result = textInputDialog.showAndWait();
-                        result.ifPresent(name -> {
-                            try {
-                                controller.saveSpreadsheetCall(name);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    updSpreadsheet();
-                });
-
-                menuIOpen.setOnAction(actionEvent -> {
-                    TextInputDialog textInputDialog = new TextInputDialog();
-
-                    textInputDialog.setTitle("Відкрити таблицю");
-                    textInputDialog.setHeaderText("Введіть назву таблиці");
-                    textInputDialog.setContentText("Name: ");
-                    Optional<String> result = textInputDialog.showAndWait();
-                    result.ifPresent(name -> {
-                        try {
-                            controller.openSpreadsheetCall(name);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    //using a method for a toggle switch when it wasn't switched
-                    grid = controller.toggleSwitched(toggleSwitchFV.isSelected());
-                    updSpreadsheet();
-                });
-
-                menuIFunctions.setOnAction(actionEvent -> {
-                    Stage popupStage = new Stage();
-                    Label popupText = new Label();
-                    popupText.setTextAlignment(TextAlignment.LEFT);
-                    popupText.setWrapText(true);
-
-                    String line;
-                    String message = "";
-                    String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\functions.txt";
-                    try {
-                        BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
-                        while ((line = bufferedReader.readLine()) != null){
-                            message += (line + "\n");
-                        }
-                        popupText.setText(message);
-                    } catch (FileNotFoundException e) {
-                        popupText.setText("ERROR: UNABLE TO GET TEXT");
-                    } catch (IOException e) {
-                        popupText.setText("ERROR: UNABLE TO GET TEXT");
-                    }
-                    popupStage.setTitle("Функціонал");
-                    popupStage.setScene(new Scene(popupText, 300, 500));
-                    //popupStage.setResizable(false);
-                    popupStage.show();
-                });
-
-                menuIErrors.setOnAction(actionEvent -> {
-                    Stage popupStage = new Stage();
-                    Label popupText = new Label();
-                    popupText.setTextAlignment(TextAlignment.LEFT);
-                    popupText.setWrapText(true);
+        menuIErrors.setOnAction(actionEvent -> {
+            Stage popupStage = new Stage();
+            Label popupText = new Label();
+            popupText.setTextAlignment(TextAlignment.LEFT);
+            popupText.setWrapText(true);
 
 
-                    String line;
-                    String message = "";
-                    String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\errors.txt";
-                    try {
-                        BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
-                        while ((line = bufferedReader.readLine()) != null){
-                            message += (line + "\n");
-                        }
-                        popupText.setText(message);
-                    } catch (FileNotFoundException e) {
-                        popupText.setText("ERROR: UNABLE TO GET TEXT");
-                    } catch (IOException e) {
-                        popupText.setText("ERROR: UNABLE TO GET TEXT");
-                    }
-                    popupStage.setTitle("Помилки");
-                    popupStage.setScene(new Scene(popupText, 300, 500));
-                    //popupStage.setResizable(false);
-                    popupStage.show();
-                });
+            String line;
+            String message = "";
+            String txtPath = "src\\main\\resources\\uni\\makarov\\lab1\\errors.txt";
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(txtPath));
+                while ((line = bufferedReader.readLine()) != null) {
+                    message += (line + "\n");
+                }
+                popupText.setText(message);
+            } catch (FileNotFoundException e) {
+                popupText.setText("ERROR: UNABLE TO GET TEXT");
+            } catch (IOException e) {
+                popupText.setText("ERROR: UNABLE TO GET TEXT");
+            }
+            popupStage.setTitle("Помилки");
+            popupStage.setScene(new Scene(popupText, 300, 500));
+            //popupStage.setResizable(false);
+            popupStage.show();
+        });
 
     }
 
-    public Parent asParent(){
+    public Parent asParent() {
         return root;
     }
 

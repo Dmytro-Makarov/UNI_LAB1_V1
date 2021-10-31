@@ -6,24 +6,27 @@ import org.controlsfx.control.spreadsheet.GridBase;
 public class ApplicationController {
     ApplicationModel model;
 
-    ApplicationController(ApplicationModel model){
+    ApplicationController(ApplicationModel model) {
         this.model = model;
     }
 
-    protected void incCol(){
+    protected void incCol() {
         model.incColumnCount();
     }
-    protected void decCol(){
+
+    protected void decCol() {
         model.decColumnCount();
     }
-    protected void incRow(){
+
+    protected void incRow() {
         model.incRowCount();
     }
-    protected void decRow(){
+
+    protected void decRow() {
         model.decRowCount();
     }
 
-    protected String receiveText(String text){
+    protected String receiveText(String text) {
         //Parse text
         return model.parse(text);
     }
@@ -36,7 +39,7 @@ public class ApplicationController {
         model.loadSpreadsheet(name);
     }
 
-    protected GridBase toggleSwitched(boolean switchValue){
+    protected GridBase toggleSwitched(boolean switchValue) {
         return model.getGrid(switchValue);
     }
 }

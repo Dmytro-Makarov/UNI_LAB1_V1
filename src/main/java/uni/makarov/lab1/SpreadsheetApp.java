@@ -5,9 +5,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
-
-
 public class SpreadsheetApp extends Application {
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -23,9 +25,5 @@ public class SpreadsheetApp extends Application {
         primaryStage.setTitle("Laboratory No.1");
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
