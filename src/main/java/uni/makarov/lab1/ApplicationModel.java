@@ -180,7 +180,6 @@ public class ApplicationModel {
 
         Scanner scanner = new Scanner(new File(fileName));
         scanner.useDelimiter(";");
-        //scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?|(\n)?");
 
         int row = Integer.parseInt(scanner.next());
         int column = Integer.parseInt(scanner.next());

@@ -48,8 +48,6 @@ VBox
 		SplitPane(Horizontal)
 				TextField
 				SpreadsheetView
-	HBox
-
 */
 
 //UI
