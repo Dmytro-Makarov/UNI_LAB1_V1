@@ -1,19 +1,13 @@
 package uni.makarov.lab1;
 
-import javafx.scene.control.cell.MapValueFactory;
 import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.Interval;
 import uni.makarov.parser.GrammarBaseVisitor;
 import uni.makarov.parser.GrammarLexer;
 import uni.makarov.parser.GrammarParser;
 
-import java.nio.file.LinkPermission;
-import java.util.Map;
-
 public class GrammarVisitor extends GrammarBaseVisitor {
 
-    //TODO
     @Override
     public Object visitParse(GrammarParser.ParseContext ctx) {
         return super.visitParse(ctx);
@@ -28,19 +22,18 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         Interval interval = new Interval(a, b);
         string = input.getText(interval);
         System.out.println(string);
-        System.out.println(ctx.WORD().toString());
         return string;
     }
 
     @Override
     public Integer visitNumericExpr(GrammarParser.NumericExprContext ctx) {
-        return Integer.parseInt(ctx.NUMBER().toString());
+        return (int) Double.parseDouble(ctx.NUMBER().toString());
     }
 
     @Override
     public Integer visitExpExpr(GrammarParser.ExpExprContext ctx) {
-        int left =  Integer.parseInt(super.visit(ctx.number(0)).toString());
-        int right = Integer.parseInt(super.visit(ctx.number(1)).toString());
+        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         return (int) Math.pow(left, right);
     }
 
@@ -51,8 +44,8 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Integer visitMulDivExpr(GrammarParser.MulDivExprContext ctx) {
-        int left =  Integer.parseInt(super.visit(ctx.number(0)).toString());
-        int right = Integer.parseInt(super.visit(ctx.number(1)).toString());
+        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.MULTIPLY)
             return left*right;
         else return  left/right;
@@ -60,8 +53,8 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Integer visitAddSumExpr(GrammarParser.AddSumExprContext ctx) {
-        int left =  Integer.parseInt(super.visit(ctx.number(0)).toString());
-        int right = Integer.parseInt(super.visit(ctx.number(1)).toString());
+        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.ADD)
             return left+right;
         else return left-right;
@@ -69,13 +62,18 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Object visitFunctionExpr(GrammarParser.FunctionExprContext ctx) {
-        return super.visitFunctionExpr(ctx);
+        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
+        if (ctx.operatorToker.getType() == GrammarLexer.MMAX)
+            return Math.max(left, right);
+        else return Math.min(left, right);
     }
+
 
     @Override
     public Integer visitModDivExpr(GrammarParser.ModDivExprContext ctx) {
-        int left =  Integer.parseInt(super.visit(ctx.number(0)).toString());
-        int right = Integer.parseInt(super.visit(ctx.number(1)).toString());
+        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.MOD)
             return Math.floorMod(left, right);
         else return Math.floorDiv(left, right);
@@ -83,7 +81,18 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Object visitFunctionCellExpr(GrammarParser.FunctionCellExprContext ctx) {
-        return super.visitFunctionCellExpr(ctx);
+        Object left = super.visit(ctx.id(0)).toString();
+        Object right = super.visit(ctx.id(1)).toString();
+        try {
+            left = (int) Double.parseDouble((String) left);
+            right = (int) Double.parseDouble((String) right);
+        } catch (NumberFormatException e) {
+            return "Cells are not numeric!";
+        }
+
+        if (ctx.operatorToker.getType() == GrammarLexer.MMAX)
+            return Math.max((Integer) left , (Integer) right);
+        else return Math.min((Integer) left , (Integer) right );
     }
 
     @Override
@@ -91,9 +100,9 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         CellID cellID = new CellID(ctx.ID().getText());
         Object result = ApplicationModel.getCellValue(cellID.row, cellID.column, true);
         try {
-            result = Integer.parseInt((String) result);
+            result = (int) Double.parseDouble((String) result);
         } catch (NumberFormatException e) {
-            return "A cell is not numeric!";
+            return "Cells are not numeric!";
         }
         return result;
     }
@@ -103,10 +112,10 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         Object left = super.visit(ctx.id(0)).toString();
         Object right = super.visit(ctx.id(1)).toString();
         try {
-            left = Integer.parseInt((String) left);
-            right = Integer.parseInt((String) right);
+            left = (int) Double.parseDouble((String) left);
+            right = (int) Double.parseDouble((String) right);
         } catch (NumberFormatException e) {
-            return "A cell is not numeric!";
+            return "Cells are not numeric!";
         }
 
         if (ctx.operatorToker.getType() == GrammarLexer.ADD)
@@ -119,10 +128,10 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         Object left = super.visit(ctx.id(0)).toString();
         Object right = super.visit(ctx.id(1)).toString();
         try {
-            left = Integer.parseInt((String) left);
-            right = Integer.parseInt((String) right);
+            left = (int) Double.parseDouble((String) left);
+            right = (int) Double.parseDouble((String) right);
         } catch (NumberFormatException e) {
-            return "A cell is not numeric!";
+            return "Cells are not numeric!";
         }
 
         if (ctx.operatorToker.getType() == GrammarLexer.MOD)
@@ -140,10 +149,10 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         Object left = super.visit(ctx.id(0)).toString();
         Object right = super.visit(ctx.id(1)).toString();
         try {
-            left = Integer.parseInt((String) left);
-            right = Integer.parseInt((String) right);
+            left = (int) Double.parseDouble((String) left);
+            right = (int) Double.parseDouble((String) right);
         } catch (NumberFormatException e) {
-            return "A cell is not numeric!";
+            return "Cells are not numeric!";
         }
 
         if (ctx.operatorToker.getType() == GrammarLexer.MULTIPLY)
@@ -156,10 +165,10 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         Object left = super.visit(ctx.id(0)).toString();
         Object right = super.visit(ctx.id(1)).toString();
         try {
-            left = Integer.parseInt((String) left);
-            right = Integer.parseInt((String) right);
+            left = (int) Double.parseDouble((String) left);
+            right = (int) Double.parseDouble((String) right);
         } catch (NumberFormatException e) {
-            return "A cell is not numeric!";
+            return "Cells are not numeric!";
         }
 
         return (int) Math.pow((Integer) left,(Integer)  right);

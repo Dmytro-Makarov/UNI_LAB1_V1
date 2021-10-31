@@ -26,9 +26,4 @@ public class CellID {
         row--;
         column--;
     }
-
-    void getNameFromRowCol(){
-
-    }
-
 }
