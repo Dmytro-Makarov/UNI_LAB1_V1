@@ -22,22 +22,29 @@ import java.util.Optional;
 /*
 VBox
 	MenuBar
-		*Menu panels*
+		MenuFile
+		    MenuSave
+		    MenuOpen
+		MenuHelp
+		    MenuFunctions
+		    MenuErrors
 	SplitPane (Vertical)
-		AnchorPane (VBox?)
-			*Buttons, Toggles, etc.*
+		VBOX
+			AnchorPane1
+			    Toggle
+			AnchorPane2
+			    LabelRow
+			    ButtonM
+			    ButtonP
+			AnchorPane3
+			    LabelColumn
+			    ButtonM
+			    ButtonP
 		SplitPane(Horizontal)
 				TextField
 				SpreadsheetView
 	HBox
 
-*/
-
-///Toolbox///
-/*
-Add/Remove a column/row
-Toggle Function/Value view
-Maybe: Zoom slider
 */
 
 //UI

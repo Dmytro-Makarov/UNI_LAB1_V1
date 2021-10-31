@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 
 
 public class SpreadsheetApp extends Application {
-    //TODO: Exiting the program while editing a cell returns an exception, add try-catch
-
     @Override
     public void start(Stage primaryStage) {
 
