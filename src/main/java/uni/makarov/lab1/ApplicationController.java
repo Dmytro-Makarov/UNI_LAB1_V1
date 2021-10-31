@@ -4,7 +4,7 @@ import org.controlsfx.control.spreadsheet.GridBase;
 
 //Process Data from UI
 public class ApplicationController {
-    ApplicationModel model;
+    private final ApplicationModel model;
 
     ApplicationController(ApplicationModel model) {
         this.model = model;
