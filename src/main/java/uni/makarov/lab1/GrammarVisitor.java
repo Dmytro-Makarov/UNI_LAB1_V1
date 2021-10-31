@@ -32,7 +32,7 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Integer visitExpExpr(GrammarParser.ExpExprContext ctx) {
-        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int left = (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
         int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         return (int) Math.pow(left, right);
     }
@@ -44,25 +44,25 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Integer visitMulDivExpr(GrammarParser.MulDivExprContext ctx) {
-        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int left = (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
         int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.MULTIPLY)
-            return left*right;
-        else return  left/right;
+            return left * right;
+        else return left / right;
     }
 
     @Override
     public Integer visitAddSumExpr(GrammarParser.AddSumExprContext ctx) {
-        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int left = (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
         int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.ADD)
-            return left+right;
-        else return left-right;
+            return left + right;
+        else return left - right;
     }
 
     @Override
     public Object visitFunctionExpr(GrammarParser.FunctionExprContext ctx) {
-        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int left = (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
         int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.MMAX)
             return Math.max(left, right);
@@ -72,7 +72,7 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
     @Override
     public Integer visitModDivExpr(GrammarParser.ModDivExprContext ctx) {
-        int left =  (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
+        int left = (int) Double.parseDouble(super.visit(ctx.number(0)).toString());
         int right = (int) Double.parseDouble(super.visit(ctx.number(1)).toString());
         if (ctx.operatorToker.getType() == GrammarLexer.MOD)
             return Math.floorMod(left, right);
@@ -91,8 +91,8 @@ public class GrammarVisitor extends GrammarBaseVisitor {
         }
 
         if (ctx.operatorToker.getType() == GrammarLexer.MMAX)
-            return Math.max((Integer) left , (Integer) right);
-        else return Math.min((Integer) left , (Integer) right );
+            return Math.max((Integer) left, (Integer) right);
+        else return Math.min((Integer) left, (Integer) right);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class GrammarVisitor extends GrammarBaseVisitor {
 
         if (ctx.operatorToker.getType() == GrammarLexer.MULTIPLY)
             return (Integer) left * (Integer) right;
-        else return  (Integer) left/ (Integer) right;
+        else return (Integer) left / (Integer) right;
     }
 
     @Override
@@ -171,7 +171,7 @@ public class GrammarVisitor extends GrammarBaseVisitor {
             return "Cells are not numeric!";
         }
 
-        return (int) Math.pow((Integer) left,(Integer)  right);
+        return (int) Math.pow((Integer) left, (Integer) right);
     }
 
 }
