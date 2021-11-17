@@ -13,10 +13,10 @@ public class ParseCellsAndNumbersTest {
         String text = "A1 ^ 2";
         ApplicationModel testModel = new ApplicationModel();
 
-        String expectedMessage = "NullPointerException";
+        String expectedMessage = "100";
 
         testModel.initGrids(10,10);
-        testModel.setCellValue(0,0,true, "3");
+        testModel.setCellValue(0,0,true, "10");
 
         String receivedMessage = testModel.parse(text);
 
