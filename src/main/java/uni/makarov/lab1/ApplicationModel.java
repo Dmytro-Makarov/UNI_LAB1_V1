@@ -192,8 +192,13 @@ public class ApplicationModel {
         while (scanner.hasNext()) {
             int r = Integer.parseInt(scanner.next());
             int c = Integer.parseInt(scanner.next());
-            setCellValue(r, c, false, scanner.next());
-            setCellValue(r, c, true, scanner.next());
+            String value1 = scanner.next();
+            String value2 = scanner.next();
+            if(r > realRowCount || c > realColumnCount){
+                continue;
+            }
+            setCellValue(r, c, false, value1);
+            setCellValue(r, c, true, value2);
             scanner.nextLine();
         }
 

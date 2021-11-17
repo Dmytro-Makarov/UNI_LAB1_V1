@@ -9,6 +9,6 @@ public class ParseNumbersTest {
         String text = "(3 + 7) * (17 mod 5) ^ (mmax((-3 - 7), 2))";
 
         ApplicationModel testModel = new ApplicationModel();
-        Assertions.assertEquals("400", testModel.parse(text));
+        Assertions.assertEquals("40", testModel.parse(text));
     }
 }

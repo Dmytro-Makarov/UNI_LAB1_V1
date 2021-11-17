@@ -26,4 +26,13 @@ public class CellID {
         row--;
         column--;
     }
+
+    static int transformColumn(String columnString){
+        char[] columnCharArr = columnString.toCharArray();
+        int column = 0;
+        for (int character = 0; character <= columnCharArr.length - 1; ++character) {
+            column += (columnCharArr[character] - 65) + Math.pow(26, character);
+        }
+        return column;
+    }
 }

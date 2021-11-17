@@ -15,8 +15,7 @@ grammar Grammar;
 
 parse
 : string
-| number
-| id
+| expression
 ;
 
 
@@ -26,24 +25,15 @@ string
 ;
 
 
-number
-: LPAREN number RPAREN                                              #parenthesisExpr
-| number operatorToker=(MULTIPLY|DIVIDE) number                     #mulDivExpr
-| number operatorToker=(ADD|SUB) number                             #addSumExpr
-| <assoc=right> number EXP number                                   #expExpr
-| number operatorToker=(MOD|DIV) number                             #modDivExpr
-| operatorToker=(MMIN|MMAX) LPAREN (number ',' number)? RPAREN      #functionExpr
-| NUMBER                                                            #numericExpr
-;
-
-id
-: LPAREN id RPAREN                                          #parenthesisCellExpr
-| id operatorToker=(MULTIPLY|DIVIDE) id                     #mulDivCellExpr
-| id operatorToker=(ADD|SUB) id                             #addSumCellExpr
-| <assoc=right> id EXP id                                   #expCellExpr
-| id operatorToker=(MOD|DIV) id                             #modDivCellExpr
-| operatorToker=(MMIN|MMAX) LPAREN (id ',' id)? RPAREN      #functionCellExpr
-| ID                                                        #cellIDExpr
+expression
+: LPAREN expression RPAREN                                                  #parenthesisExpr
+| <assoc=right> expression EXP expression                                   #expExpr
+| expression operatorToker=(MULTIPLY|DIVIDE) expression                     #mulDivExpr
+| expression operatorToker=(MOD|DIV) expression                             #modDivExpr
+| expression operatorToker=(ADD|SUB) expression                             #addSumExpr
+| operatorToker=(MMIN|MMAX) LPAREN (expression (',' expression)+)? RPAREN      #functionExpr
+| NUMBER                                                                    #numericExpr
+| ID                                                                        #cellIDExpr
 ;
 
 
